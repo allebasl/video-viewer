@@ -1,0 +1,4 @@
+imageio-ffmpeg
+faster-whisper
+numpy
+pillow
