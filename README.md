@@ -49,9 +49,13 @@ details that are easy to miss.
 ```bash
 python scripts/extract.py VIDEO --probe            # duration, audio, frame-count estimates
 python scripts/extract.py VIDEO --fps 2            # frames + transcript + timeline.md
+python scripts/extract.py VIDEO --clean            # delete the extracted frames
 ```
 
 Options: `--max-frames 150`, `--width 768`, `--model base|small|medium`, `--no-audio`, `--out DIR`.
+
+Claude deletes the frames automatically once it has finished analyzing the video. The text files
+(`timeline.md`, `transcript.txt`, `manifest.json`) are kept so it can still answer follow-up questions.
 
 Output folder (default: `<temp>/video-viewer/<video name>/`):
 
@@ -60,7 +64,7 @@ Output folder (default: `<temp>/video-viewer/<video name>/`):
 | `timeline.md` | one row per frame: time, change %, area %, label, speech |
 | `transcript.txt` | timestamped speech |
 | `manifest.json` | the same data, machine-readable |
-| `frames/` | the extracted JPGs |
+| `frames/` | the extracted JPGs (deleted after analysis) |
 
 ## Known issues
 

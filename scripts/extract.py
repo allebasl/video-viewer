@@ -4,6 +4,7 @@ Usage:
   python extract.py VIDEO --probe                 # just print duration / frame estimate
   python extract.py VIDEO [--fps 2] [--out DIR] [--max-frames 150]
                           [--width 768] [--model base] [--no-audio]
+  python extract.py VIDEO --clean [--out DIR]     # delete the extracted frames when done
 
 Outputs (in --out, default: <tmp>/video-viewer/<video-stem>/):
   frames/frame_00001.jpg ...   sampled frames
@@ -133,6 +134,23 @@ def transcribe(video, out, model_name):
     return segments, f"language={info.language} (p={info.language_probability:.2f})"
 
 
+def clean(out):
+    """Delete the extracted frame images (only frame_*.jpg inside out/frames)."""
+    fdir = out / "frames"
+    if not fdir.is_dir():
+        print(f"No frames to delete in {out}")
+        return
+    removed = 0
+    for f in fdir.glob("frame_*.jpg"):
+        f.unlink()
+        removed += 1
+    try:
+        fdir.rmdir()
+    except OSError:
+        pass  # folder has other files in it; leave them alone
+    print(f"Deleted {removed} frames from {fdir}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
@@ -143,9 +161,14 @@ def main():
     ap.add_argument("--model", default="base")
     ap.add_argument("--no-audio", action="store_true")
     ap.add_argument("--probe", action="store_true")
+    ap.add_argument("--clean", action="store_true")
     a = ap.parse_args()
 
     video = Path(a.video).expanduser().resolve()
+    out = Path(a.out) if a.out else Path(tempfile.gettempdir()) / "video-viewer" / video.stem
+    if a.clean:
+        clean(out)
+        return
     if not video.exists():
         sys.exit(f"Video not found: {video}")
     dur, has_audio, res = probe(video)
@@ -163,7 +186,6 @@ def main():
               f"(--max-frames {a.max_frames}). Raise --max-frames to override.")
         fps = new
 
-    out = Path(a.out) if a.out else Path(tempfile.gettempdir()) / "video-viewer" / video.stem
     out.mkdir(parents=True, exist_ok=True)
 
     frames = extract_frames(video, out, fps, a.width)

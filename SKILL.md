@@ -94,12 +94,25 @@ Be honest about the limits of sampling: anything faster than the frame interval 
 missed. If something important seems to happen between two frames, say so, and offer to re-extract that
 section at a higher rate.
 
+### 6. Delete the frames
+As soon as you've finished the report (or answered the user's question), delete the screenshots you took.
+Always do this; don't ask first. Pass the same video and `--out` (if you used one) as for extraction:
+
+```bash
+python ~/.claude/skills/video-viewer/scripts/extract.py "<video>" --clean
+```
+
+This removes only the `frames/` images. `timeline.md`, `transcript.txt` and `manifest.json` stay, so you
+can still answer follow-ups about timing and speech. End your reply with one short line saying the frames were deleted.
+
 ### Follow-ups
-The frames stay in the output folder, so you can answer follow-up questions by re-reading specific frames
-instead of extracting again. To zoom in on a short section at a higher rate, cut it with the bundled ffmpeg:
+The frames are gone after step 6, but `timeline.md` and `transcript.txt` are still there, so answer from those
+when you can. If you need to see the picture again, re-run step 3 (just the section you need, if possible),
+look, and run `--clean` again when done. To zoom in on a short section at a higher rate, cut it with the bundled ffmpeg:
 
 ```bash
 python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"
 "<ffmpeg>" -ss 00:00:12 -to 00:00:16 -i "<video>" -c copy clip.mp4
 ```
-Then run extract.py on `clip.mp4` with a higher `--fps` and a separate `--out`.
+Then run extract.py on `clip.mp4` with a higher `--fps` and a separate `--out`. When you're done, run
+`--clean` with that same `--out` and delete `clip.mp4`.
